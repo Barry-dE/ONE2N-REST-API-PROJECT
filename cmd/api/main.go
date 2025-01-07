@@ -4,10 +4,12 @@ import (
 	"log"
 
 	"github.com/Barry-dE/ONE2N-REST-API-PROJECT/internal/env"
+	"github.com/Barry-dE/ONE2N-REST-API-PROJECT/internal/store"
 	"github.com/lpernett/godotenv"
 )
 
 func main() {
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -18,14 +20,16 @@ func main() {
 		env:  env.GetString("ENV", "Development"),
 	}
 
+	// To-do: pass the database connection to the store.
+	store := store.NewStudentStore(nil)
+
 	app := &application{
 		config: cfg,
+		store:  *store,
 	}
 
-	// Mount routes and get the gin engine
 	handler := app.mount()
 
-	//Start the server
 	if err := app.run(handler); err != nil {
 		log.Fatal(err)
 	}

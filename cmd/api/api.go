@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Barry-dE/ONE2N-REST-API-PROJECT/internal/store"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,6 +16,7 @@ type Config struct {
 
 type application struct {
 	config Config
+	store  store.Storage
 }
 
 func (app *application) mount() *gin.Engine {
