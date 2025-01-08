@@ -9,9 +9,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type dbConfig struct {
+	addr               string
+	maxOpenConnections int
+	maxIdleConnections int
+	MaxLifetime        time.Duration
+	maxIdleTime        time.Duration
+}
+
 type Config struct {
 	addr string
 	env  string
+	db   dbConfig
 }
 
 type application struct {
