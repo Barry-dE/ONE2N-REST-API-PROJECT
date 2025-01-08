@@ -20,7 +20,8 @@ func main() {
 		env:  env.GetString("ENV", "Development"),
 	}
 
-	// To-do: pass the database connection to the store.
+	// To-do: create the database connection pool and pass it to the store.
+	
 	store := store.NewStudentStore(nil)
 
 	app := &application{
