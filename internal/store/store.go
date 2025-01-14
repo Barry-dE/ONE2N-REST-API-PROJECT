@@ -13,10 +13,8 @@ type Storage struct {
 	Students StudentRepository
 }
 
-
 func NewStudentStore(db *sql.DB) *Storage {
 	return &Storage{
 		Students: &StudentStore{db: db},
 	}
 }
-

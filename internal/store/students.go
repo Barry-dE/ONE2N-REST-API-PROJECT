@@ -23,7 +23,7 @@ type StudentStore struct {
 
 func (s *StudentStore) Create(ctx context.Context, student *Student) error {
 	query := `
-	INSERT INTO students (firstname, lastname, email, age, sex) VALUES($1, $2, $3, $4, $5) RETURNING id, created_at, updated_at
+	INSERT INTO students (first_name, last_name, email, age, sex) VALUES($1, $2, $3, $4, $5) RETURNING id, created_at, updated_at
 	`
 
 	err := s.db.QueryRowContext(ctx, query, student.FirstName, student.LastName, student.Email, student.Age, student.Sex).Scan(

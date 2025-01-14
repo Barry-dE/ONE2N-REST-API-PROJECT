@@ -54,7 +54,7 @@ func (app *application) run(handler *gin.Engine) error {
 		IdleTimeout:  time.Minute,
 	}
 
-	log.Printf("Starting server on %s", app.config.addr)
+	log.Printf(" Server running on %s", app.config.addr)
 
 	return srv.ListenAndServe()
 

@@ -18,7 +18,7 @@ func NewDBConnection(addr string, maxOpenConns, maxIdleConns int, maxIdleTime ti
 	db.SetConnMaxIdleTime(maxIdleTime)
 	db.SetConnMaxLifetime(maxLifeTime)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
 	err = db.PingContext(ctx)
