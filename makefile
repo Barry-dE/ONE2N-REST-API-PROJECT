@@ -9,7 +9,7 @@ create-migrations:
 .PHONY: migrations-up
 migrations-up:
 	@echo "Migrating..."
-	@migrate -path=$(MIGRATIONS_PATH)  -database=$(DB_ADDR) up
+	@migrate -verbose -path=$(MIGRATIONS_PATH)  -database=$(DB_ADDR) up
 	
 
 .PHONY: migrations-down
