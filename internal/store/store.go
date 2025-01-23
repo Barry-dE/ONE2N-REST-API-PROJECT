@@ -3,6 +3,11 @@ package store
 import (
 	"context"
 	"database/sql"
+	"errors"
+)
+
+var (
+	ErrDuplicateEmail = errors.New("duplicate email")
 )
 
 type StudentRepository interface {

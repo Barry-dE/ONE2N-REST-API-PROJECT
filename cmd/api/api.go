@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Barry-dE/ONE2N-REST-API-PROJECT/internal/middleware"
 	"github.com/Barry-dE/ONE2N-REST-API-PROJECT/internal/store"
 	"github.com/gin-gonic/gin"
 )
@@ -31,14 +32,18 @@ type application struct {
 func (app *application) mount() *gin.Engine {
 	router := gin.Default()
 
+	//custom middleware
+
+	router.Use(middleware.DisallowUnknownFields())
+
 	v1 := router.Group("/api/v1")
 	{
 
 		v1.GET("/healthCheck", app.healthCheckHandler)
 
-		v1.Group("/students")
+		students := v1.Group("/students")
 		{
-
+			students.POST("/", app.createStudentHandler)
 		}
 	}
 
