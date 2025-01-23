@@ -2,7 +2,7 @@
 
 This repository contains a Student CRUD REST API implemented in Golang using the Gin framework. The project serves as a learning exercise to explore best practices in building RESTful APIs, containerization, CI/CD pipelines, deployment, and observability. It's main purpose is to get hands-on experience with building and managing production workloads.
 
-##Technology Stack
+## Technology Stack
 Golang, Gin, PostgreSQL, Docker, Docker-Compose, GitHub Actions, Vagrant, Nginx, Kubernetes, Helm, ArgoCD, Prometheus, Grafana, Loki, Promtail, Postman.
 
 ## Features
@@ -18,7 +18,7 @@ Golang, Gin, PostgreSQL, Docker, Docker-Compose, GitHub Actions, Vagrant, Nginx,
 
 ### Non-Functional Requirements
 
-- API versioning: Supports versioning (e.g., api/v1/<resource>).
+- API versioning: Supports versioning (e.g., `api/v1/<resource>`).
 - Meaningful logging: Emits structured logs with appropriate log levels.
 - Environment variables: Configurations are externalized and injected.
 - Unit testing: Includes tests for all endpoints.
