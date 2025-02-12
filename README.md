@@ -1,9 +1,9 @@
-# ONE2N-REST-API-PROJECT
+# REST-API-PROJECT
 
-This repository contains a Student CRUD REST API implemented in Golang using the Gin framework. The project serves as a learning exercise to explore best practices in building RESTful APIs, containerization, CI/CD pipelines, deployment, and observability. It's main purpose is to get hands-on experience with building and managing production workloads.
+This repository contains a  CRUD REST API implemented in Golang using the Gin framework. The project serves as a learning exercise to explore best practices in building RESTful APIs, containerization, CI/CD pipelines, deployment, and observability. It's main purpose is to get hands-on experience with building and managing production workloads.
 
 ## Technology Stack
-Golang, Gin, PostgreSQL, Docker, Docker-Compose, GitHub Actions, Vagrant, Nginx, Kubernetes, Helm, ArgoCD, Prometheus, Grafana, Loki, Promtail, Postman.
+Golang, Gin, PostgreSQL, Docker, GitHub Actions, Vagrant, Nginx, Kubernetes, Helm, ArgoCD, Prometheus, Grafana, Loki, Promtail, Postman.
 
 ## Features
 
