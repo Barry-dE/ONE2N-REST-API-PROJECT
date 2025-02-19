@@ -5,8 +5,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Barry-dE/ONE2N-REST-API-PROJECT/internal/handler"
 	"github.com/Barry-dE/ONE2N-REST-API-PROJECT/internal/middleware"
-	"github.com/Barry-dE/ONE2N-REST-API-PROJECT/internal/store"
+	"github.com/Barry-dE/ONE2N-REST-API-PROJECT/internal/repository"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,16 +27,15 @@ type Config struct {
 }
 
 type application struct {
-	config Config
-	store  store.Storage
+	config  Config
+	handler *handler.Handler
 }
 
-func (app *application) mount() *gin.Engine {
+func (app *application) mount(repo *repository.Storage) *gin.Engine {
 	router := gin.Default()
 
 	//custom middleware
-
-	router.Use(middleware.DisallowUnknownFields())
+	// router.Use(middleware.DisallowUnknownFieldsMiddleware())
 
 	v1 := router.Group("/api/v1")
 	{
@@ -43,7 +44,14 @@ func (app *application) mount() *gin.Engine {
 
 		students := v1.Group("/students")
 		{
-			students.POST("/", app.createStudentHandler)
+			students.POST("/", app.handler.CreateStudentHandler)
+
+			studentID := students.Group("/:studentID")
+			studentID.Use(middleware.StudentContextMiddleware(repo))
+			{
+				studentID.GET("", app.handler.GetStudentByID)
+				studentID.PATCH("", app.handler.UpdateStudentHandler)
+			}
 		}
 	}
 

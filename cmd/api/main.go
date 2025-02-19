@@ -6,19 +6,20 @@ import (
 
 	"github.com/Barry-dE/ONE2N-REST-API-PROJECT/internal/db"
 	"github.com/Barry-dE/ONE2N-REST-API-PROJECT/internal/env"
-	"github.com/Barry-dE/ONE2N-REST-API-PROJECT/internal/store"
+	"github.com/Barry-dE/ONE2N-REST-API-PROJECT/internal/handler"
+	"github.com/Barry-dE/ONE2N-REST-API-PROJECT/internal/repository"
 	_ "github.com/lib/pq"
 	"github.com/lpernett/godotenv"
 )
 
 func main() {
-	// Load environment variables
+	// Load .env variables
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
-	// Application congiguration
+	// App congiguration
 	cfg := Config{
 		addr: env.GetString("ADDR", ":3000"),
 		env:  env.GetString("ENV", "development"),
@@ -31,29 +32,30 @@ func main() {
 		},
 	}
 
-	// Establsih a new database connection pool
+	// Logger
+
+	// Database
 	db, err := db.NewDBConnection(cfg.db.addr, cfg.db.maxOpenConnections, cfg.db.maxIdleConnections, cfg.db.maxIdleTime, cfg.db.MaxLifetime)
 	if err != nil {
 		log.Panic(err)
 	}
-
+	defer db.Close()
 	log.Println("database connection established")
 
-	defer db.Close()
+	repo := repository.NewStudentStore(db)
 
-	// Initialize student data store
-	store := store.NewStudentStore(db)
+	h := handler.NewHandler(*repo)
 
 	app := &application{
-		config: cfg,
-		store:  *store,
+		config:  cfg,
+		handler: h,
 	}
 
-	handler := app.mount()
+	handler := app.mount(repo)
 
 	if err := app.run(handler); err != nil {
 		log.Fatal(err)
 	}
 
-	// log.Printf("Server started on %s", cfg.addr)
+	log.Printf("Server running on %s", cfg.addr)
 }

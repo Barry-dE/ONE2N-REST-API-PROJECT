@@ -1,45 +1,53 @@
 package middleware
 
 import (
-	"bytes"
-	"encoding/json"
-	"io"
+	"errors"
 	"net/http"
+	"strconv"
 
+	"github.com/Barry-dE/ONE2N-REST-API-PROJECT/internal/repository"
 	"github.com/gin-gonic/gin"
 )
 
-// DisallowUnknownFields prevents unknown fields in JSON request
-func DisallowUnknownFields() gin.HandlerFunc {
+const StudentContextKey string = "student"
+
+func StudentContextMiddleware(store *repository.Storage) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Read entire body
-		bodyBytes, err := io.ReadAll(c.Request.Body)
+		idParam := c.Param("studentID")
+		id, err := strconv.ParseInt(idParam, 10, 64)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error": "Unable to read request body",
-			})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid student ID"})
+			c.Abort()
 			return
 		}
 
-		// Limit the request body to 1 MB
-		c.Request.Body = http.MaxBytesReader(c.Writer, io.NopCloser(bytes.NewBuffer(bodyBytes)), 1<<20)
-
-		// Create a custom JSON decoder that disallows unknown fields
-		decoder := json.NewDecoder(c.Request.Body)
-		decoder.DisallowUnknownFields()
-
-		// Decode the body into an empty struct to check for unknown fields
-		if err := decoder.Decode(&struct{}{}); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error": "Unknown field in request body: " + err.Error(),
-			})
+		student, err := store.Students.GetByID(c.Request.Context(), id)
+		if err != nil {
+			if errors.Is(err, repository.ErrNotFound) {
+				c.JSON(http.StatusNotFound, gin.H{"error": "student not found"})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+			}
+			c.Abort()
 			return
 		}
 
-		// Reset body for next middleware
-		c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+		c.Set(StudentContextKey, student)
 
-		// Proceed to the next middleware or handler
 		c.Next()
 	}
+}
+
+func GetPostFromCtx(c *gin.Context) *repository.Student {
+	value, exists := c.Get(StudentContextKey)
+	if !exists {
+		return nil
+	}
+
+	student, ok := value.(*repository.Student)
+	if !ok {
+		return nil
+	}
+
+	return student
 }

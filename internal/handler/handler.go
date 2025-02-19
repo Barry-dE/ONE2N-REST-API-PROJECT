@@ -1,8 +1,11 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
+	"reflect"
 
+	"github.com/Barry-dE/ONE2N-REST-API-PROJECT/internal/middleware"
 	"github.com/Barry-dE/ONE2N-REST-API-PROJECT/internal/repository"
 	"github.com/gin-gonic/gin"
 )
@@ -17,8 +20,7 @@ func NewHandler(store repository.Storage) *Handler {
 	}
 }
 
-// Represents HTTP payload for student creation
-type CreateStudent struct {
+type CreateStudentpayload struct {
 	FirstName string `json:"firstName" binding:"required"`
 	LastName  string `json:"lastName" binding:"required"`
 	Email     string `json:"email" binding:"required,email"`
@@ -26,14 +28,21 @@ type CreateStudent struct {
 	Sex       string `json:"sex" binding:"required,oneof=M F Other"`
 }
 
-// CreateStudentHandler handles student creation
+type updateStudentPayload struct {
+	FirstName *string `json:"firstName"`
+	LastName  *string `json:"lastName"`
+	Email     *string `json:"email" binding:"omitempty,email"`
+	Age       *int    `json:"age" binding:"omitempty,gte=0,lte=150"`
+	Sex       *string `json:"sex" binding:"omitempty,oneof=M F Other"`
+}
+
 func (h *Handler) CreateStudentHandler(c *gin.Context) {
 
-	var payload CreateStudent
+	var payload CreateStudentpayload
 
-	// validate request
 	err := c.ShouldBindJSON(&payload)
 	if err != nil {
+		// To-do: standardize all json responses
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -41,7 +50,6 @@ func (h *Handler) CreateStudentHandler(c *gin.Context) {
 		return
 	}
 
-	// Convert the incoming payload to the domain model
 	student := &repository.Student{
 		FirstName: payload.FirstName,
 		LastName:  payload.LastName,
@@ -50,7 +58,6 @@ func (h *Handler) CreateStudentHandler(c *gin.Context) {
 		Sex:       payload.Sex,
 	}
 
-	// Persist student data in the database
 	err = h.store.Students.Create(c.Request.Context(), student)
 	if err != nil {
 		switch err {
@@ -64,4 +71,68 @@ func (h *Handler) CreateStudentHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, student)
+}
+
+func (h *Handler) GetStudentByID(c *gin.Context) {
+
+	student := middleware.GetPostFromCtx(c)
+	if student == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Student not found in context"})
+		return
+	}
+	c.JSON(http.StatusOK, student)
+
+}
+
+func (h *Handler) UpdateStudentHandler(c *gin.Context) {
+
+	student := middleware.GetPostFromCtx(c)
+	if student == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Student not found in context"})
+		return
+	}
+
+	var payload updateStudentPayload
+
+	err := c.ShouldBindJSON(&payload)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	studentValue := reflect.ValueOf(student).Elem()
+	payloadValue := reflect.ValueOf(payload).Elem()
+
+	updated := false
+
+	for i := 0; i < payloadValue.NumField(); i++ {
+		field := payloadValue.Field(i)
+
+		if !field.IsNil() {
+			studentField := studentValue.Field(i)
+			studentField.Set(field.Elem())
+			updated = true
+		}
+	}
+
+	if !updated {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No update fields provided"})
+		return
+	}
+
+	err = h.store.Students.Update(c.Request.Context(), student)
+	if err != nil {
+		if errors.Is(err, repository.ErrNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Student not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update student"})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, student)
+}
+
+func (h *Handler) DeleteStudentHandler(c *gin.Context) {
+
 }

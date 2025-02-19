@@ -8,10 +8,13 @@ import (
 
 var (
 	ErrDuplicateEmail = errors.New("duplicate email")
+	ErrNotFound       = errors.New("resource not found")
 )
 
 type StudentRepository interface {
-	Create(ctx context.Context, student *Student) error
+	Create(context.Context, *Student) error
+	GetByID(context.Context, int64) (*Student, error)
+	Update(context.Context, *Student) error
 }
 
 type Storage struct {

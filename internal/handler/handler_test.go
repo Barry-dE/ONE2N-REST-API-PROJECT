@@ -26,6 +26,11 @@ func (m *MockStudentStore) Create(ctx context.Context, student *repository.Stude
 	return args.Error(0)
 }
 
+func (m *MockStudentStore) GetByID(ctx context.Context, student *repository.Student) error {
+	args := m.Called(ctx, student)
+	return args.Error(0)
+}
+
 func TestCreateStudentHandler(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
